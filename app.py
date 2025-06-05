@@ -2,17 +2,20 @@ from flask import Flask, request, render_template, redirect, url_for, flash
 from googleapiclient.errors import HttpError
 import pandas as pd
 import traceback
+import os
+import json
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets.readonly']
-SERVICE_ACCOUNT_FILE = 'credentials.json'  # path to your JSON key
+SERVICE_ACCOUNT_JSON = os.getenv('PRIVATE_JSON')  # your env var name on Railway
 
 
 
 def get_google_sheet(sheet_id, range_name):
     try:
-        creds = service_account.Credentials.from_service_account_file(
-            SERVICE_ACCOUNT_FILE, scopes=SCOPES)
+        creds_info = json.loads(SERVICE_ACCOUNT_JSON)
+        creds = service_account.Credentials.from_service_account_info(creds_info, scopes=SCOPES)
+
         service = build('sheets', 'v4', credentials=creds)
         sheet = service.spreadsheets()
         result = sheet.values().get(spreadsheetId=sheet_id, range=range_name).execute()
