@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head><title>Find Matches</title></head>
+<body>
+<h1>Find Rotation Matches</h1>
+
+{% if message %}
+  <p style="color:red;">{{ message }}</p>
+{% endif %}
+
+<form method="POST">
+  <label>Your Name:<br><input type="text" name="name" required></label><br><br>
+
+  <label>Select Rotation Block:<br>
+    <select name="block" required>
+      <option value="" disabled selected>-- Select Block --</option>
+      {% for block in blocks %}
+        <option value="{{ block }}">{{ block }}</option>
+      {% endfor %}
+    </select>
+  </label><br><br>
+
+  <button type="submit">Find Matches</button>
+</form>
+
+{% if matches %}
+  <h2>Matches for {{ matches[0].specialty }} in {{ matches[0].block }}</h2>
+  <ul>
+  {% for m in matches %}
+    <li>{{ m.name }} - {{ m.location }} - {{ m.phone }}</li>
+  {% endfor %}
+  </ul>
+{% endif %}
+
+<a href="{{ url_for('load_sheet') }}">Upload another file</a>
+</body>
+</html>
