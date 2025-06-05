@@ -1,22 +1,18 @@
-import os
-import json
 from flask import Flask, request, render_template, redirect, url_for, flash
 from googleapiclient.errors import HttpError
 import pandas as pd
 import traceback
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
-
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets.readonly']
+SERVICE_ACCOUNT_FILE = 'credentials.json'  # path to your JSON key
+
+
 
 def get_google_sheet(sheet_id, range_name):
     try:
-        creds_json = os.environ.get('GOOGLE_CREDENTIALS')
-        if not creds_json:
-            raise ValueError("Missing GOOGLE_CREDENTIALS environment variable")
-        creds_info = json.loads(creds_json)
-        creds = service_account.Credentials.from_service_account_info(creds_info, scopes=SCOPES)
-        
+        creds = service_account.Credentials.from_service_account_file(
+            SERVICE_ACCOUNT_FILE, scopes=SCOPES)
         service = build('sheets', 'v4', credentials=creds)
         sheet = service.spreadsheets()
         result = sheet.values().get(spreadsheetId=sheet_id, range=range_name).execute()
@@ -33,7 +29,6 @@ def get_google_sheet(sheet_id, range_name):
     except Exception as e:
         print(traceback.format_exc())
         raise
-
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
 
@@ -86,16 +81,40 @@ def parse_google_form_spreadsheet(df):
 def load_sheet():
     try:
         SHEET_ID = '1VwjJy0_9NdFHPIPLd9GA6mr0OUiMq_IxaRFyEQD7C1Q'
-        RANGE_NAME = 'Unformatted'  # or the exact range, e.g. 'A1:Z1000'
+        RANGE_NAME = ('Unformatted')  # or the exact range, e.g. 'A1:Z1000'
         df = get_google_sheet(SHEET_ID, RANGE_NAME)
 
         global students
         students = parse_google_form_spreadsheet(df)
 
         return redirect(url_for('find_matches'))
+
+
     except Exception as e:
         error_details = traceback.format_exc()
         return f"<h2>Error loading Google Sheet:</h2><pre>{error_details}</pre>"
+
+# @app.route("/", methods=["GET", "POST"])
+# def upload_file():
+#     if request.method == "POST":
+#         file = request.files.get("file")
+#         if not file:
+#             flash("No file uploaded!", "error")
+#             return redirect(request.url)
+#         try:
+#             df = pd.read_excel(file)
+#             # You can add column checks here if you want
+#
+#             global students
+#             students = parse_google_form_spreadsheet(df)
+#
+#             flash(f"Uploaded {len(students)} rotation records!", "success")
+#             return redirect(url_for("find_matches"))
+#         except Exception as e:
+#             flash(f"Error reading file: {e}", "error")
+#             return redirect(request.url)
+#
+#     return render_template("upload.html")
 
 @app.route("/find_matches", methods=["GET", "POST"])
 def find_matches():
@@ -121,3 +140,4 @@ def find_matches():
 
 if __name__ == "__main__":
     app.run(debug=True)
+
