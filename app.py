@@ -5,7 +5,7 @@ import traceback
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets.readonly']
-SERVICE_ACCOUNT_FILE = 'credentials.json'  # path to your JSON key
+SERVICE_ACCOUNT_FILE = json.loads(os.environ.get('GOOGLE_CREDENTIALS'))  # path to your JSON key
 
 
 
