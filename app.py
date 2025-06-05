@@ -9,6 +9,9 @@ import os
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 
+# app.py
+app = Flask(__name__)
+
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets.readonly']
 
 
