@@ -12,12 +12,8 @@ from googleapiclient.discovery import build
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets.readonly']
 
 
-SERVICE_ACCOUNT_JSON = os.getenv('PRIVATE_JSON')  # your env var name on Railway
+SERVICE_ACCOUNT_JSON = os.getenv('GOOGLE_CREDENTIALS')  # your env var name on Railway
 
-
-
-
-GOOGLE_CREDENTIALS = os.environ.get("GOOGLE_CREDENTIALS")
 
 
 def get_google_sheet(sheet_id, range_name):
