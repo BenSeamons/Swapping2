@@ -2,17 +2,33 @@ from flask import Flask, request, render_template, redirect, url_for, flash
 from googleapiclient.errors import HttpError
 import pandas as pd
 import traceback
-import os
+
 import json
+import os
+
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
+
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets.readonly']
+
+
 SERVICE_ACCOUNT_JSON = os.getenv('PRIVATE_JSON')  # your env var name on Railway
 
 
 
+
+GOOGLE_CREDENTIALS = os.environ.get("GOOGLE_CREDENTIALS")
+
+
 def get_google_sheet(sheet_id, range_name):
     try:
+
+        if not GOOGLE_CREDENTIALS:
+            raise RuntimeError("GOOGLE_CREDENTIALS environment variable not set")
+        creds_info = json.loads(GOOGLE_CREDENTIALS)
+        creds = service_account.Credentials.from_service_account_info(
+            creds_info, scopes=SCOPES)
+
         creds_info = json.loads(SERVICE_ACCOUNT_JSON)
         creds = service_account.Credentials.from_service_account_info(creds_info, scopes=SCOPES)
 
