@@ -22,19 +22,23 @@ GOOGLE_CREDENTIALS = os.environ.get("GOOGLE_CREDENTIALS")
 
 def get_google_sheet(sheet_id, range_name):
     try:
-
-        if not GOOGLE_CREDENTIALS:
-            raise RuntimeError("GOOGLE_CREDENTIALS environment variable not set")
-        creds_info = json.loads(GOOGLE_CREDENTIALS)
-        creds = service_account.Credentials.from_service_account_info(
-            creds_info, scopes=SCOPES)
-
+        start = time.time()
         creds_info = json.loads(SERVICE_ACCOUNT_JSON)
-        creds = service_account.Credentials.from_service_account_info(creds_info, scopes=SCOPES)
+        print(f"Loaded JSON creds in {time.time() - start:.2f} seconds")
 
+        start = time.time()
+        creds = service_account.Credentials.from_service_account_info(creds_info, scopes=SCOPES)
+        print(f"Created credentials in {time.time() - start:.2f} seconds")
+
+        start = time.time()
         service = build('sheets', 'v4', credentials=creds)
+        print(f"Built Google Sheets service in {time.time() - start:.2f} seconds")
+
+        start = time.time()
         sheet = service.spreadsheets()
         result = sheet.values().get(spreadsheetId=sheet_id, range=range_name).execute()
+        print(f"Executed Sheets API request in {time.time() - start:.2f} seconds")
+
         values = result.get('values', [])
         if not values:
             raise ValueError("No data found in the Google Sheet")
@@ -42,9 +46,6 @@ def get_google_sheet(sheet_id, range_name):
         data = values[1:]
         df = pd.DataFrame(data, columns=headers)
         return df
-    except HttpError as e:
-        print("HttpError details:", e.content.decode())
-        raise
     except Exception as e:
         print(traceback.format_exc())
         raise
