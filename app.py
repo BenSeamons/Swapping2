@@ -2,7 +2,7 @@ from flask import Flask, request, render_template, redirect, url_for, flash
 from googleapiclient.errors import HttpError
 import pandas as pd
 import traceback
-
+import time
 import json
 import os
 
@@ -10,7 +10,7 @@ from google.oauth2 import service_account
 from googleapiclient.discovery import build
 
 # app.py
-app = Flask(__name__)
+#app = Flask(__name__)
 
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets.readonly']
 
