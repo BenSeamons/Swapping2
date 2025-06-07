@@ -139,23 +139,33 @@ def load_sheet():
 def find_matches():
     matches = []
     message = ""
-    blocks = sorted(set(s['block'] for s in students))  # to show dropdown of blocks
+    blocks = sorted(set(s['block'] for s in students))
 
     if request.method == "POST":
         your_name = request.form.get("name", "").strip()
         your_block = request.form.get("block", "")
 
-        your_entries = [s for s in students if s["name"].lower() == your_name.lower() and s["block"] == your_block]
+        print(f"Looking for name containing: {your_name.lower()} and block: {your_block}")
+        print(f"All names in block: {[s['name'] for s in students if s['block'] == your_block]}")
+
+        your_entries = [
+            s for s in students
+            if your_name.lower() in s["name"].lower() and s["block"] == your_block
+        ]
+
+        print(f"Entries found: {your_entries}")
+
         if not your_entries:
             message = f"No rotation found for {your_name} in {your_block}."
         else:
             specialty = your_entries[0]["specialty"]
             matches = [
                 s for s in students
-                if s["block"] == your_block and s["specialty"] == specialty and s["name"].lower() != your_name.lower()
+                if s["block"] == your_block and s["specialty"] == specialty and your_name.lower() not in s["name"].lower()
             ]
 
     return render_template("find_matches.html", matches=matches, message=message, blocks=blocks)
+
 
 if __name__ == "__main__":
     app.run(debug=True)
