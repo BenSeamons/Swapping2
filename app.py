@@ -137,6 +137,15 @@ def load_sheet():
 
 @app.route("/find_matches", methods=["GET", "POST"])
 def find_matches():
+    global students
+    try:
+        SHEET_ID = '1VwjJy0_9NdFHPIPLd9GA6mr0OUiMq_IxaRFyEQD7C1Q'
+        RANGE_NAME = 'Unformatted'
+        df = get_google_sheet(SHEET_ID, RANGE_NAME)
+        students = parse_google_form_spreadsheet(df)
+    except Exception as e:
+        return f"Error loading data: {e}"
+
     matches = []
     message = ""
     blocks = sorted(set(s['block'] for s in students))
@@ -145,15 +154,10 @@ def find_matches():
         your_name = request.form.get("name", "").strip()
         your_block = request.form.get("block", "")
 
-        print(f"Looking for name containing: {your_name.lower()} and block: {your_block}")
-        print(f"All names in block: {[s['name'] for s in students if s['block'] == your_block]}")
-
         your_entries = [
             s for s in students
             if your_name.lower() in s["name"].lower() and s["block"] == your_block
         ]
-
-        print(f"Entries found: {your_entries}")
 
         if not your_entries:
             message = f"No rotation found for {your_name} in {your_block}."
