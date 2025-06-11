@@ -25,6 +25,11 @@ def load_and_cache_data():
     students = parse_google_form_spreadsheet(df)
     print(f"Loaded {len(students)} student records into cache")
 
+try:
+    load_and_cache_data()
+except Exception as e:
+    print("Failed to load data at startup:", e)
+
 
 def get_google_sheet(sheet_id, range_name):
     try:
