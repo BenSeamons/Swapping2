@@ -17,6 +17,13 @@ SCOPES = ['https://www.googleapis.com/auth/spreadsheets.readonly']
 
 SERVICE_ACCOUNT_JSON = os.getenv('GOOGLE_CREDENTIALS')  # your env var name on Railway
 
+def load_and_cache_data():
+    global students
+    SHEET_ID = '1VwjJy0_9NdFHPIPLd9GA6mr0OUiMq_IxaRFyEQD7C1Q'
+    RANGE_NAME = 'Unformatted'
+    df = get_google_sheet(SHEET_ID, RANGE_NAME)
+    students = parse_google_form_spreadsheet(df)
+    print(f"Loaded {len(students)} student records into cache")
 
 
 def get_google_sheet(sheet_id, range_name):
@@ -52,6 +59,8 @@ app = Flask(__name__)
 app.secret_key = "supersecretkey"
 
 students = []  # flattened list of all clerkship entries per student
+
+load_and_cache_data()  # Load data once when app starts
 
 def parse_google_form_spreadsheet(df):
     students_expanded = []
@@ -137,15 +146,6 @@ def load_sheet():
 
 @app.route("/find_matches", methods=["GET", "POST"])
 def find_matches():
-    global students
-    try:
-        SHEET_ID = '1VwjJy0_9NdFHPIPLd9GA6mr0OUiMq_IxaRFyEQD7C1Q'
-        RANGE_NAME = 'Unformatted'
-        df = get_google_sheet(SHEET_ID, RANGE_NAME)
-        students = parse_google_form_spreadsheet(df)
-    except Exception as e:
-        return f"Error loading data: {e}"
-
     matches = []
     message = ""
     blocks = sorted(set(s['block'] for s in students))
@@ -169,6 +169,7 @@ def find_matches():
             ]
 
     return render_template("find_matches.html", matches=matches, message=message, blocks=blocks)
+
 
 
 if __name__ == "__main__":
